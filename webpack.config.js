@@ -1,7 +1,7 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
-import { fileURLToPath } from 'url';
+//import { fileURLToPath } from 'url';
 
 /*const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin')*/;

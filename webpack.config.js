@@ -11,7 +11,10 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 const config = {
-  entry: './src/index.js',
+
+  entry: {
+    main: path.resolve(dirname, './src/index.js'),
+  },
   output: {
     path: path.resolve(dirname, 'dist'),
   },
@@ -28,6 +31,7 @@ const config = {
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
+  performance: { hints: false },
   module: {
     rules: [
       {
@@ -38,12 +42,17 @@ const config = {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: 'asset',
       },
+      {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
+      },
 
-      // Add your rules for custom modules here
+// Add your rules for custom modules here
       // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
 };
+
 
 export default () => {
   if (isProduction) {

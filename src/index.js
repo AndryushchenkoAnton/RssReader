@@ -1,5 +1,5 @@
 import app from './app.js';
 
-console.log('src/index.js');
+console.log('bnm,src/index.js');
 
 app();

@@ -1,9 +1,14 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import i18next from 'i18next';
+import { setLocale } from 'yup';
+import render from './render.js';
+import resources from './locales/index.js';
 
 export default () => {
   const state = {
     form: {
+      lng: 'ru',
       valid: true,
       state: 'filling',
       error: null,
@@ -11,44 +16,47 @@ export default () => {
     links: [],
   };
 
-  const validateSchema = yup.string().url().notOneOf(state.links);
+  const form = document.querySelector('.rss-form');
+  const watcher = onChange(state, render);
 
-  const textInput = document.body.querySelector('#url-input');
-  // const buttonAdd = document.body.querySelector('[aria-label = "add"]');
-  const feedbackP = document.body.querySelector('.feedback');
-  const form = document.body.querySelector('.rss-form');
-  const watcher = onChange(state, (path, value) => {
-    if (path === 'form.valid') {
-      switch (value) {
-        case false:
-          textInput.classList.add('is-invalid');
-          feedbackP.textContent = 'Ссылка должна быть валидным URL';
+  const validation = (arrayOfLinks, inputValue) => {
+    setLocale({
+      string: {
+        url: 'validURL',
+      },
+      mixed: {
+        notOneOf: 'alreadyExists',
+      },
+    });
 
-          break;
-        case true:
-          textInput.classList.remove('is-invalid');
-          feedbackP.textContent = '';
-          break;
+    const schema = yup.string().url().notOneOf(arrayOfLinks);
+    return schema.validate(inputValue);
+  };
 
-        default:
-          break;
-      }
-    }
-  });
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const value = formData.get('url');
-    validateSchema.isValid(value)
-      .then((result) => {
-        if (result && !watcher.links.includes((value))) {
-          watcher.form.valid = true;
-          watcher.links.push(value);
-          form.reset();
-          return;
-        }
-        watcher.form.valid = false;
+  const i18nextInstance = i18next.createInstance();
+  i18nextInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  })
+    .then(() => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const value = formData.get('url');
+        validation(watcher.links, value)
+          .then((result) => {
+            watcher.form.valid = true;
+            watcher.form.error = null;
+            watcher.links.push(result);
+            form.reset();
+            return result;
+          })
+          .catch((e) => {
+            const message = i18nextInstance.t(e.message);
+            watcher.form.valid = false;
+            watcher.form.error = { type: e.name, message };
+          });
       });
-  });
+    });
 };

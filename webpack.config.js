@@ -3,8 +3,6 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-/*const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin')*/;
 
 const isProduction = process.env.NODE_ENV === 'production';
 const filename = fileURLToPath(import.meta.url);

@@ -12,6 +12,7 @@ const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
   acc[name] = el.nodeText;
   return acc;
 }, { index }));
+
 const validation = (arrayOfLinks, inputValue) => {
   yup.setLocale({
     string: {
@@ -31,7 +32,7 @@ export default () => {
     form: {
       lng: 'ru',
       valid: true,
-      state: 'filling',
+      state: 'ready',
       error: null,
     },
     descLink: [],
@@ -41,6 +42,25 @@ export default () => {
 
   const form = document.querySelector('.rss-form');
   const watcher = onChange(state, render);
+  const updateLink = (links, oldFeeds) => {
+    const parsedData = links.map((link) => axios.get(allOrigins(link)/* .catch(() => []) */));
+    const data = Promise.all(parsedData);
+    data.then((resolve) => {
+      const dataC = resolve.map((el) => parse(el.data.contents));
+      const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
+      const titleOld = oldFeeds.map((el) => el.title);
+      const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
+      if (filteredFeeds.length !== 0) {
+        watcher.currentFeeds.push(...filteredFeeds);
+        watcher.form.state = 'updating';
+      }
+    }).then(() => {
+      setTimeout(() => {
+        watcher.form.state = 'ready';
+        return updateLink(state.links, state.currentFeeds);
+      }, 5000);
+    });
+  };
 
   const i18nextInstance = i18next.createInstance();
   i18nextInstance.init({
@@ -76,8 +96,8 @@ export default () => {
             const { title, description, feedsInfo } = parsedResponse;
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);
-            console.log(indexed);
             watcher.currentFeeds.push(...indexed);
+            updateLink(state.links, state.currentFeeds);
           })
           .catch((e) => {
             const message = i18nextInstance.t(e.message);

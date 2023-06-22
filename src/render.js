@@ -23,6 +23,8 @@ export default (path, value) => {
   if (path === 'form.valid') {
     switch (value) {
       case false:
+        feedbackP.classList.remove('text-success');
+        feedbackP.classList.add('text-danger');
         textInput.classList.add('is-invalid');
         break;
 
@@ -35,14 +37,19 @@ export default (path, value) => {
     }
   }
   if (path === 'form.error') {
+
     switch (value.type) {
       case 'ValidationError':
+        feedbackP.classList.add('text-danger');
         feedbackP.textContent = value.message;
+
         break;
       case 'parseError':
+        feedbackP.classList.add('text-danger');
         feedbackP.textContent = value.message;
         break;
       case 'axiosError':
+        feedbackP.classList.add('text-danger');
         feedbackP.textContent = value.message;
         break;
 

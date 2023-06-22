@@ -33,7 +33,7 @@ export default () => {
       lng: 'ru',
       valid: true,
       state: 'ready',
-      error: null,
+      error: {type: null},
     },
     descLink: [],
     links: [],
@@ -79,7 +79,7 @@ export default () => {
         validation(watcher.links, value)
           .then((result) => {
             watcher.form.valid = true;
-            watcher.form.error = null;
+            watcher.form.error = {type: null};
             watcher.links.push(result);
             form.reset();
             return result;
@@ -89,6 +89,7 @@ export default () => {
             return axios.get(allOrigins(link));
           })
           .then((response) => {
+
             if (response.status !== 200) {
               const e = new Error('axiosError');
               e.name = 'axiosError';

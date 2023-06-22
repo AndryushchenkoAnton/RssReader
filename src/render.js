@@ -37,7 +37,6 @@ export default (path, value) => {
     }
   }
   if (path === 'form.error') {
-
     switch (value.type) {
       case 'ValidationError':
         feedbackP.classList.add('text-danger');

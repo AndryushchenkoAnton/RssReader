@@ -33,7 +33,7 @@ export default () => {
       lng: 'ru',
       valid: true,
       state: 'ready',
-      error: {type: null},
+      error: { type: null },
     },
     descLink: [],
     links: [],
@@ -49,7 +49,7 @@ export default () => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)/* .catch(() => []) */));
     const data = Promise.all(parsedData);
     data.then((resolve) => {
-      const dataC = resolve.map((el) => parse(el.data.contents)).filter((data) => data !== false);
+      const dataC = resolve.map((el) => parse(el.data.contents)).filter((dataF) => dataF !== false);
       const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
       const titleOld = oldFeeds.map((el) => el.title);
       const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
@@ -79,7 +79,7 @@ export default () => {
         validation(watcher.links, value)
           .then((result) => {
             watcher.form.valid = true;
-            watcher.form.error = {type: null};
+            watcher.form.error = { type: null };
 
             form.reset();
             return result;
@@ -90,7 +90,6 @@ export default () => {
             return axios.get(allOrigins(link));
           })
           .then((response) => {
-
             if (response.status !== 200) {
               const e = new Error('axiosError');
               e.name = 'axiosError';
@@ -105,7 +104,7 @@ export default () => {
             }
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
-            console.log(feedsInfo)
+            console.log(feedsInfo);
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);
             watcher.currentFeeds.push(...indexed);

@@ -115,7 +115,6 @@ export default (path, value) => {
         feedbackP.textContent = value.message;
         break;
       case 'sending':
-        console.log(submitB);
         submitB.disabled = true;
         break;
       default:

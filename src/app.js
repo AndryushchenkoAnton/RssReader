@@ -90,16 +90,18 @@ export default () => {
             return axios.get(allOrigins(link));
           })
           .then((response) => {
+            watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
               const e = new Error('axiosError');
               e.name = 'axiosError';
+
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);
             if (!parsedResponse) {
               const e = new Error('parseError');
               e.name = 'parseError';
-              watcher.form.state = { name: 'loaded' };
+
               throw (e);
             }
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };

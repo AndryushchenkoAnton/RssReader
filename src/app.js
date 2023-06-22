@@ -38,6 +38,9 @@ export default () => {
     descLink: [],
     links: [],
     currentFeeds: [],
+    uiState: {
+      readPosts: [],
+    },
   };
 
   const form = document.querySelector('.rss-form');
@@ -98,6 +101,17 @@ export default () => {
             const indexed = addId(feedsInfo, watcher.links.length);
             watcher.currentFeeds.push(...indexed);
             updateLink(state.links, state.currentFeeds);
+            const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
+            buttonsDesc.forEach((button) => {
+              button.addEventListener('click', () => {
+                const link = button.parentNode.querySelector('a');
+                link.classList.remove('fw-bold');
+                link.classList.add('fw-normal');
+                const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
+                watcher.uiState.readPosts.push(...post);
+                console.log(state.uiState.readPosts);
+              });
+            });
           })
           .catch((e) => {
             const message = i18nextInstance.t(e.message);

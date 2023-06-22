@@ -1,5 +1,6 @@
 const textInput = document.body.querySelector('#url-input');
 const feedbackP = document.body.querySelector('.feedback');
+const submitB = document.body.querySelector('[aria-label = "add"]');
 
 const makeElements = (list, type) => {
   const divCont1 = document.createElement('div');
@@ -34,11 +35,21 @@ export default (path, value) => {
     }
   }
   if (path === 'form.error') {
-    if (value.type === 'ValidationError') {
-      feedbackP.textContent = value.message;
-      return;
+    switch (value.type) {
+      case 'ValidationError':
+        feedbackP.textContent = value.message;
+        break;
+      case 'parseError':
+        feedbackP.textContent = value.message;
+        break;
+      case 'axiosError':
+        feedbackP.textContent = value.message;
+        break;
+
+      default:
+        feedbackP.textContent = '';
+        break;
     }
-    feedbackP.textContent = '';
   }
   if (path === 'descLink') {
     const rssDiv = document.body.querySelector('.feeds');
@@ -88,5 +99,22 @@ export default (path, value) => {
       return li;
     });
     postDiv.append(makeElements(liList, 'Посты'));
+  }
+  if (path === 'form.state') {
+    switch (value.name) {
+      case 'success':
+        textInput.classList.remove('is-invalid');
+        feedbackP.classList.remove('text-danger');
+        feedbackP.classList.add('text-success');
+        feedbackP.textContent = value.message;
+        break;
+      case 'sending':
+        console.log(submitB);
+        submitB.disabled = true;
+        break;
+      default:
+        submitB.disabled = false;
+        break;
+    }
   }
 };

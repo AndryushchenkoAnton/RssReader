@@ -55,11 +55,11 @@ export default () => {
       const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
       if (filteredFeeds.length !== 0) {
         watcher.currentFeeds.push(...filteredFeeds);
-        watcher.form.state = 'updating';
+        watcher.form.state = { name: 'updating' };
       }
     }).then(() => {
       setTimeout(() => {
-        watcher.form.state = 'ready';
+        watcher.form.state = { name: 'ready' };
         return updateLink(state.links, state.currentFeeds);
       }, 5000);
     });
@@ -85,17 +85,23 @@ export default () => {
             return result;
           })
           .then((link) => {
-            watcher.form.state = 'sending';
+            watcher.form.state = { name: 'sending' };
             return axios.get(allOrigins(link));
           })
           .then((response) => {
             if (response.status !== 200) {
-              throw new Error(`netWorkError: ${response.status}`);
+              const e = new Error('axiosError');
+              e.name = 'axiosError';
+              throw (e);
             }
             const parsedResponse = parse(response.data.contents);
             if (!parsedResponse) {
-              throw new Error('parserError');
+              const e = new Error('parseError');
+              e.name = 'parseError';
+              watcher.form.state = { name: 'loaded' };
+              throw (e);
             }
+            watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);

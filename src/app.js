@@ -49,7 +49,7 @@ export default () => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)/* .catch(() => []) */));
     const data = Promise.all(parsedData);
     data.then((resolve) => {
-      const dataC = resolve.map((el) => parse(el.data.contents));
+      const dataC = resolve.map((el) => parse(el.data.contents)).filter((data) => data !== false);
       const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
       const titleOld = oldFeeds.map((el) => el.title);
       const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
@@ -86,6 +86,7 @@ export default () => {
           })
           .then((link) => {
             watcher.form.state = { name: 'sending' };
+            watcher.links.push(value);
             return axios.get(allOrigins(link));
           })
           .then((response) => {
@@ -102,9 +103,9 @@ export default () => {
               watcher.form.state = { name: 'loaded' };
               throw (e);
             }
-            watcher.links.push(value);
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
+            console.log(feedsInfo)
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);
             watcher.currentFeeds.push(...indexed);

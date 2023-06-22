@@ -80,7 +80,7 @@ export default () => {
           .then((result) => {
             watcher.form.valid = true;
             watcher.form.error = {type: null};
-            watcher.links.push(result);
+
             form.reset();
             return result;
           })
@@ -102,6 +102,7 @@ export default () => {
               watcher.form.state = { name: 'loaded' };
               throw (e);
             }
+            watcher.links.push(value);
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
             watcher.descLink.push({ title, description });

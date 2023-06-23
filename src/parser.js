@@ -2,18 +2,23 @@ export default (data) => {
   const parserDOM = new DOMParser();
   const parsedData = parserDOM.parseFromString(data, 'application/xml');
   const error = parsedData.querySelector('parsererror');
+
   if (error) {
     return false;
   }
-  const document = parsedData.documentElement;
-  const docFirstChild = document.firstChild;
-  const elements = Array.from(docFirstChild.children).filter((child) => child.nodeType !== 3);
 
+  const document = parsedData.documentElement;
+  const docFirstChild = document.children[0];
+  console.log(docFirstChild)
+  const elements = Array.from(docFirstChild.children).filter((child) => child.nodeType !== 3);//here
+  console.log(elements)
   const [title, description] = elements;
+
   const feedsInfo = elements.filter((node) => node.nodeName === 'item')
     .map((nodeItem) => {
       const children = Array.from(nodeItem.childNodes)
         .filter((el) => el.nodeType !== 3);
+
       return children.map((childEl) => {
         const { nodeName } = childEl;
         const nodeText = childEl.textContent;

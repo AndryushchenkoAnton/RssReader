@@ -81,32 +81,33 @@ export default () => {
             watcher.form.valid = true;
             watcher.form.error = { type: null };
 
-            form.reset();
+
             return result;
           })
           .then((link) => {
             watcher.form.state = { name: 'sending' };
-            watcher.links.push(value);
+
+
             return axios.get(allOrigins(link));
           })
           .then((response) => {
+
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
               const e = new Error('axiosError');
               e.name = 'axiosError';
-
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);
             if (!parsedResponse) {
               const e = new Error('parseError');
               e.name = 'parseError';
-
               throw (e);
             }
+            form.reset();
+            watcher.links.push(value);
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
-            console.log(feedsInfo);
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);
             watcher.currentFeeds.push(...indexed);

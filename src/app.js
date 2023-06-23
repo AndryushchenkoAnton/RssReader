@@ -5,6 +5,7 @@ import axios from 'axios';
 import render from './render.js';
 import resources from './locales/index.js';
 import parse from './parser.js';
+import {ValidationError} from "yup";
 
 const allOrigins = (link) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
 const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
@@ -131,10 +132,19 @@ console.log(response);
             });
           })
           .catch((e) => {
+            if(e.name === 'ValidationError'){
+              const message = i18nextInstance.t(e.message);
+              watcher.form.valid = false;
+              watcher.form.error = { type: e.name, message };
+              return ;
+            }
             const message = i18nextInstance.t(e.name);
             watcher.form.valid = false;
             watcher.form.error = { type: e.name, message };
-          });
+
+
+
+
       });
     });
 };

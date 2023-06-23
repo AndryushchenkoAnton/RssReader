@@ -85,66 +85,66 @@ export default () => {
         const formData = new FormData(event.target);
         const value = formData.get('url');
         validation(watcher.links, value)
-          .then((result) => {
-            watcher.form.valid = true;
-            watcher.form.error = { type: null };
+            .then((result) => {
+              watcher.form.valid = true;
+              watcher.form.error = {type: null};
 
 
-            return result;
-          })
-          .then((link) => {
-            watcher.form.state = { name: 'sending' };
+              return result;
+            })
+            .then((link) => {
+              watcher.form.state = {name: 'sending'};
 
 
-            return axios.get(allOrigins(link));
-          })
-          .then((response) => {
-console.log(response);
-            watcher.form.state = { name: 'loaded' };
-            if (response.status !== 200) {
-              const e = new Error(`networkError: ${response.status}`);
-              throw (e);
-            }
-            const parsedResponse = parse(response.data.contents);
-            if (!parsedResponse) {
-              const e = new Error('parseError');
-              e.name = 'parseError';
-              throw (e);
-            }
-            form.reset();
-            watcher.links.push(value);
-            watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
-            const { title, description, feedsInfo } = parsedResponse;
-            watcher.descLink.push({ title, description });
-            const indexed = addId(feedsInfo, watcher.links.length);
-            watcher.currentFeeds.push(...indexed);
-            updateLink(state.links, state.currentFeeds);
-            const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
-            buttonsDesc.forEach((button) => {
-              button.addEventListener('click', () => {
-                const link = button.parentNode.querySelector('a');
-                link.classList.remove('fw-bold');
-                link.classList.add('fw-normal');
-                const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
-                watcher.uiState.readPosts.push(...post);
-                console.log(i18nextInstance.t('AxiosError'));
+              return axios.get(allOrigins(link));
+            })
+            .then((response) => {
+              console.log(response);
+              watcher.form.state = {name: 'loaded'};
+              if (response.status !== 200) {
+                const e = new Error(`networkError: ${response.status}`);
+                throw (e);
+              }
+              const parsedResponse = parse(response.data.contents);
+              if (!parsedResponse) {
+                const e = new Error('parseError');
+                e.name = 'parseError';
+                throw (e);
+              }
+              form.reset();
+              watcher.links.push(value);
+              watcher.form.state = {name: 'success', message: i18nextInstance.t('success')};
+              const {title, description, feedsInfo} = parsedResponse;
+              watcher.descLink.push({title, description});
+              const indexed = addId(feedsInfo, watcher.links.length);
+              watcher.currentFeeds.push(...indexed);
+              updateLink(state.links, state.currentFeeds);
+              const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
+              buttonsDesc.forEach((button) => {
+                button.addEventListener('click', () => {
+                  const link = button.parentNode.querySelector('a');
+                  link.classList.remove('fw-bold');
+                  link.classList.add('fw-normal');
+                  const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
+                  watcher.uiState.readPosts.push(...post);
+                  console.log(i18nextInstance.t('AxiosError'));
+                });
               });
-            });
-          })
-          .catch((e) => {
-            if(e.name === 'ValidationError'){
-              const message = i18nextInstance.t(e.message);
+            })
+            .catch((e) => {
+              if (e.name === 'ValidationError') {
+                const message = i18nextInstance.t(e.message);
+                watcher.form.valid = false;
+                watcher.form.error = {type: e.name, message};
+                return;
+              }
+              const message = i18nextInstance.t(e.name);
               watcher.form.valid = false;
-              watcher.form.error = { type: e.name, message };
-              return ;
-            }
-            const message = i18nextInstance.t(e.name);
-            watcher.form.valid = false;
-            watcher.form.error = { type: e.name, message };
+              watcher.form.error = {type: e.name, message};
 
 
-
-
-      });
-    });
+            });
+      })
+    })
 };
+

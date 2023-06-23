@@ -94,8 +94,9 @@ export default () => {
 
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
-              const e = new Error('axiosError');
-              e.name = 'networkError';
+              const e = new Error();
+              e.name = 'axiosError';
+              e.message = 'axiosError'
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);
@@ -120,7 +121,7 @@ export default () => {
                 link.classList.add('fw-normal');
                 const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
                 watcher.uiState.readPosts.push(...post);
-                console.log(state.uiState.readPosts);
+                console.log(i18nextInstance.t('axiosError'));
               });
             });
           })

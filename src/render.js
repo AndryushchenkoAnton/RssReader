@@ -47,7 +47,7 @@ export default (path, value) => {
         feedbackP.classList.add('text-danger');
         feedbackP.textContent = value.message;
         break;
-      case 'axiosError':
+      case 'AxiosError':
         feedbackP.classList.add('text-danger');
         feedbackP.textContent = value.message;
         break;

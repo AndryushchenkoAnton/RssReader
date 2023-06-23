@@ -4,6 +4,6 @@ export default {
     alreadyExists: 'RSS already exists',
     success: 'RSS uploaded successfully',
     parseError: 'The resource does not contain valid RSS',
-    axiosError: 'Network error',
+    AxiosError: 'Network error',
   },
 };

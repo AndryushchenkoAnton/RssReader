@@ -95,7 +95,7 @@ export default () => {
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
               const e = new Error('axiosError');
-              e.name = 'axiosError';
+              e.name = 'networkError';
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);

@@ -46,10 +46,16 @@ export default () => {
   const form = document.querySelector('.rss-form');
   const watcher = onChange(state, render);
   const updateLink = (links, oldFeeds) => {
-    const parsedData = links.map((link) => axios.get(allOrigins(link)/* .catch(() => []) */));
+    const parsedData = links.map((link) => axios.get(allOrigins(link)));
     const data = Promise.all(parsedData);
     data.then((resolve) => {
-      const dataC = resolve.map((el) => parse(el.data.contents)).filter((dataF) => dataF !== false);
+      const dataC = resolve.map((el) => {
+        const parsed = parse(el.data.contents);
+        if(!parsed){
+          throw new Error()
+        }
+        return parsed
+      }).filter((dataF) => dataF !== false);
       const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
       const titleOld = oldFeeds.map((el) => el.title);
       const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
@@ -62,7 +68,8 @@ export default () => {
         watcher.form.state = { name: 'ready' };
         return updateLink(state.links, state.currentFeeds);
       }, 5000);
-    });
+    })
+        .catch(() => []);
   };
 
   const i18nextInstance = i18next.createInstance();
@@ -91,10 +98,12 @@ export default () => {
             return axios.get(allOrigins(link));
           })
           .then((response) => {
-
+console.log(response);
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
-              const e = new Error(`networkError: ${response.status}`);
+              const e = new Error();
+              e.name = 'AxiosError'
+              e.message = 'AxiosError';
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);

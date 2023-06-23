@@ -101,9 +101,7 @@ export default () => {
 console.log(response);
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
-              const e = new Error();
-              e.name = 'AxiosError'
-              e.message = 'AxiosError';
+              const e = new Error(`networkError: ${response.status}`);
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);
@@ -133,7 +131,7 @@ console.log(response);
             });
           })
           .catch((e) => {
-            const message = i18nextInstance.t(e.message);
+            const message = i18nextInstance.t(e.name);
             watcher.form.valid = false;
             watcher.form.error = { type: e.name, message };
           });

@@ -53,7 +53,6 @@ export default (path, value) => {
         break;
 
       default:
-        feedbackP.textContent = '';
         break;
     }
   }

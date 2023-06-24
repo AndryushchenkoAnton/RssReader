@@ -3,7 +3,6 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-
 const isProduction = process.env.NODE_ENV === 'production';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -45,12 +44,11 @@ const config = {
         use: ['style-loader', 'css-loader', 'sass-loader', 'postcss-loader'],
       },
 
-// Add your rules for custom modules here
+      // Add your rules for custom modules here
       // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
 };
-
 
 export default () => {
   if (isProduction) {

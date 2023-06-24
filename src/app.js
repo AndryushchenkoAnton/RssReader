@@ -5,7 +5,6 @@ import axios from 'axios';
 import render from './render.js';
 import resources from './locales/index.js';
 import parse from './parser.js';
-import {ValidationError} from "yup";
 
 const allOrigins = (link) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
 const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
@@ -41,6 +40,7 @@ export default () => {
     currentFeeds: [],
     uiState: {
       readPosts: [],
+      currentPost: null,
     },
   };
 
@@ -52,10 +52,10 @@ export default () => {
     data.then((resolve) => {
       const dataC = resolve.map((el) => {
         const parsed = parse(el.data.contents);
-        if(!parsed){
-          throw new Error()
+        if (!parsed) {
+          throw new Error();
         }
-        return parsed
+        return parsed;
       }).filter((dataF) => dataF !== false);
       const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
       const titleOld = oldFeeds.map((el) => el.title);
@@ -70,7 +70,7 @@ export default () => {
         return updateLink(state.links, state.currentFeeds);
       }, 5000);
     })
-        .catch(() => []);
+      .catch(() => []);
   };
 
   const i18nextInstance = i18next.createInstance();
@@ -85,66 +85,59 @@ export default () => {
         const formData = new FormData(event.target);
         const value = formData.get('url');
         validation(watcher.links, value)
-            .then((result) => {
-              watcher.form.valid = true;
-              watcher.form.error = {type: null};
+          .then((result) => {
+            watcher.form.valid = true;
+            watcher.form.error = { type: null };
 
+            return result;
+          })
+          .then((link) => {
+            watcher.form.state = { name: 'sending' };
 
-              return result;
-            })
-            .then((link) => {
-              watcher.form.state = {name: 'sending'};
-
-
-              return axios.get(allOrigins(link));
-            })
-            .then((response) => {
-              console.log(response);
-              watcher.form.state = {name: 'loaded'};
-              if (response.status !== 200) {
-                const e = new Error(`networkError: ${response.status}`);
-                throw (e);
-              }
-              const parsedResponse = parse(response.data.contents);
-              if (!parsedResponse) {
-                const e = new Error('parseError');
-                e.name = 'parseError';
-                throw (e);
-              }
-              form.reset();
-              watcher.links.push(value);
-              watcher.form.state = {name: 'success', message: i18nextInstance.t('success')};
-              const {title, description, feedsInfo} = parsedResponse;
-              watcher.descLink.push({title, description});
-              const indexed = addId(feedsInfo, watcher.links.length);
-              watcher.currentFeeds.push(...indexed);
-              updateLink(state.links, state.currentFeeds);
-              const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
-              buttonsDesc.forEach((button) => {
-                button.addEventListener('click', () => {
-                  const link = button.parentNode.querySelector('a');
-                  link.classList.remove('fw-bold');
-                  link.classList.add('fw-normal');
-                  const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
-                  watcher.uiState.readPosts.push(...post);
-                  console.log(i18nextInstance.t('AxiosError'));
-                });
+            return axios.get(allOrigins(link));
+          })
+          .then((response) => {
+            console.log(response);
+            watcher.form.state = { name: 'loaded' };
+            if (response.status !== 200) {
+              const e = new Error(`networkError: ${response.status}`);
+              throw (e);
+            }
+            const parsedResponse = parse(response.data.contents);
+            if (!parsedResponse) {
+              const e = new Error('parseError');
+              e.name = 'parseError';
+              throw (e);
+            }
+            form.reset();
+            watcher.links.push(value);
+            watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
+            const { title, description, feedsInfo } = parsedResponse;
+            watcher.descLink.push({ title, description });
+            const indexed = addId(feedsInfo, watcher.links.length);
+            watcher.currentFeeds.push(...indexed);
+            updateLink(state.links, state.currentFeeds);
+            const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
+            buttonsDesc.forEach((button) => {
+              button.addEventListener('click', () => {
+                const link = button.parentNode.querySelector('a');
+                const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
+                watcher.uiState.currentPost = post;
+                watcher.uiState.readPosts.push({ post: post[post.length - 1], link });
               });
-            })
-            .catch((e) => {
-              if (e.name === 'ValidationError') {
-                const message = i18nextInstance.t(e.message);
-                watcher.form.valid = false;
-                watcher.form.error = {type: e.name, message};
-                return;
-              }
-              const message = i18nextInstance.t(e.name);
-              watcher.form.valid = false;
-              watcher.form.error = {type: e.name, message};
-
-
             });
-      })
-    })
+          })
+          .catch((e) => {
+            if (e.name === 'ValidationError') {
+              const message = i18nextInstance.t(e.message);
+              watcher.form.valid = false;
+              watcher.form.error = { type: e.name, message };
+              return;
+            }
+            const message = i18nextInstance.t(e.name);
+            watcher.form.valid = false;
+            watcher.form.error = { type: e.name, message };
+          });
+      });
+    });
 };
-

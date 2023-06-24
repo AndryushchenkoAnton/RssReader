@@ -56,6 +56,19 @@ export default (path, value) => {
         break;
     }
   }
+  if (path === 'uiState.currentPost') {
+    const modalContent = value[value.length - 1];
+    const titleModal = document.querySelector('.modal-title');
+    const descModal = document.querySelector('.modal-body');
+    titleModal.textContent = modalContent.title;
+    descModal.textContent = modalContent.description;
+  }
+  if (path === 'uiState.readPosts') {
+    const lastElement = value[value.length - 1];
+    const { link } = lastElement;
+    link.classList.remove('fw-bold');
+    link.classList.add('fw-normal');
+  }
   if (path === 'descLink') {
     const rssDiv = document.body.querySelector('.feeds');
     rssDiv.innerHTML = '';
@@ -76,6 +89,7 @@ export default (path, value) => {
     rssDiv.append(makeElements(rssElements, 'Фиды'));
     return;
   }
+
   if (path === 'currentFeeds') {
     const postDiv = document.body.querySelector('.posts');
     postDiv.innerHTML = '';
@@ -88,8 +102,6 @@ export default (path, value) => {
       button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
       button.setAttribute('data-bs-toggle', 'modal');
       button.setAttribute('data-bs-target', '#modal');
-      const titleModal = document.querySelector('.modal-title');
-      const descModal = document.querySelector('.modal-body');
       a.setAttribute('href', el.link);
       a.setAttribute('rel', 'noopener noreferrer');
       a.setAttribute('target', '_blank');
@@ -97,8 +109,6 @@ export default (path, value) => {
       a.classList.add('fw-bold');
       a.textContent = el.title;
       button.textContent = 'Просмотр';
-      titleModal.textContent = el.title;
-      descModal.textContent = el.description;
       li.prepend(button);
       li.prepend(a);
       return li;

@@ -9,9 +9,7 @@ export default (data) => {
 
   const document = parsedData.documentElement;
   const docFirstChild = document.children[0];
-  console.log(docFirstChild)
-  const elements = Array.from(docFirstChild.children).filter((child) => child.nodeType !== 3);//here
-  console.log(elements)
+  const elements = Array.from(docFirstChild.children).filter((child) => child.nodeType !== 3);
   const [title, description] = elements;
 
   const feedsInfo = elements.filter((node) => node.nodeName === 'item')

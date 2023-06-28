@@ -1,5 +1,3 @@
-import modal from "bootstrap/js/src/modal.js";
-
 const makeElements = (list, type) => {
   const divCont1 = document.createElement('div');
   const divCont2 = document.createElement('div');

@@ -14,13 +14,11 @@ const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
 }, { index }));
 
 const validation = (links, inputValue) => {
-
   const schema = yup.string().url().notOneOf(links);
   return schema.validate(inputValue);
 };
 
 export default () => {
-
   yup.setLocale({
     string: {
       url: 'validURL',

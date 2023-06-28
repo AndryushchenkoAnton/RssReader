@@ -48,6 +48,13 @@ export default () => {
     },
   };
 
+  const i18nextInstance = i18next.createInstance();
+  i18nextInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  }).then()
+
   const elements = {
     form: document.querySelector('.rss-form'),
     posts: document.querySelector('.posts'),
@@ -58,7 +65,8 @@ export default () => {
     feedbackP: document.body.querySelector('.feedback'),
   };
 
-  const watcher = onChange(state, render(elements));
+
+  const watcher = onChange(state, render(elements, i18nextInstance));
   const updateLink = (links, oldFeeds) => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)));
     const data = Promise.all(parsedData);
@@ -86,13 +94,8 @@ export default () => {
       .catch(() => []);
   };
 
-  const i18nextInstance = i18next.createInstance();
-  i18nextInstance.init({
-    lng: 'ru',
-    debug: true,
-    resources,
-  })
-    .then(() => {
+
+
       elements.form.addEventListener('submit', (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
@@ -134,16 +137,14 @@ export default () => {
           })
           .catch((e) => {
             if (e.name === 'ValidationError') {
-              const message = i18nextInstance.t(e.message);
               watcher.form.valid = false;
-              watcher.form.error = { type: e.name, message };
+              watcher.form.error = { type: e.name, message: e.message };
               return;
             }
-            const message = i18nextInstance.t(e.name);
             watcher.form.valid = false;
-            watcher.form.error = { type: e.name, message };
+            watcher.form.error = { type: e.name, message: e.name };
           });
       });
-    });
+
   updateLink(state.links, state.currentFeeds);
 };

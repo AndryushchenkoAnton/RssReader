@@ -15,7 +15,7 @@ const makeElements = (list, type) => {
   return divCont1;
 };
 
-export default (elements) => (path, value) => {
+export default (elements, i18) => (path, value) => {
   if (path === 'form.valid') {
     switch (value) {
       case false:
@@ -36,16 +36,16 @@ export default (elements) => (path, value) => {
     switch (value.type) {
       case 'ValidationError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = value.message;
+        elements.feedbackP.textContent = i18.t(value.message);
 
         break;
       case 'parseError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = value.message;
+        elements.feedbackP.textContent = i18.t(value.message);
         break;
       case 'AxiosError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = value.message;
+        elements.feedbackP.textContent = i18.t(value.message);
         break;
 
       default:
@@ -119,7 +119,7 @@ export default (elements) => (path, value) => {
         elements.textInput.classList.remove('is-invalid');
         elements.feedbackP.classList.remove('text-danger');
         elements.feedbackP.classList.add('text-success');
-        elements.feedbackP.textContent = value.message;
+        elements.feedbackP.textContent = i18.t(value.message);
         break;
       case 'sending':
         elements.submitB.disabled = true;

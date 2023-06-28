@@ -106,7 +106,7 @@ export default (elements, i18) => (path, value) => {
       a.setAttribute('data-id', el.index);
       a.classList.add('fw-bold');
       a.textContent = el.title;
-      button.textContent = 'Просмотр';
+      button.textContent = i18.t('rssRead');
       li.prepend(button);
       li.prepend(a);
       return li;

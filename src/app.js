@@ -65,6 +65,25 @@ export default () => {
     feedbackP: document.body.querySelector('.feedback'),
   };
 
+  const setText = (windowEl) => {
+    const appName = document.body.querySelector('#appName');
+    const appDesc = document.body.querySelector('#appDesc');
+    const textHint = document.body.querySelector('#textHint');
+    const submitText = document.body.querySelector('button[aria-label="add"]');
+    const exampleText = document.body.querySelector('#example');
+    const modalClose = windowEl.modal.querySelector('.btn-secondary');
+    const modalReadFull = windowEl.modal.querySelector('a');
+
+    appName.textContent = i18nextInstance.t('appName');
+    appDesc.textContent = i18nextInstance.t('appDesc');
+    textHint.textContent = i18nextInstance.t('rssTip');
+    submitText.textContent = i18nextInstance.t('submitText');
+    exampleText.textContent = i18nextInstance.t('exampleURL');
+    modalReadFull.textContent = i18nextInstance.t('moduleReadFull');
+    modalClose.textContent = i18nextInstance.t('moduleClose');
+   
+  };
+
   const watcher = onChange(state, render(elements, i18nextInstance));
   const updateLink = (links, oldFeeds) => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)));
@@ -92,7 +111,7 @@ export default () => {
     })
       .catch(() => []);
   };
-
+  setText(elements);
   elements.form.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -117,7 +136,7 @@ export default () => {
         const parsedResponse = parse(response.data.contents);
         elements.form.reset();
         watcher.links.push(value);
-        watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
+        watcher.form.state = { name: 'success', message: 'success' };
         const { title, description, feedsInfo } = parsedResponse;
         watcher.descLink.push({ title, description });
         const indexed = addId(feedsInfo, watcher.links.length);

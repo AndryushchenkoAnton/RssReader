@@ -13,7 +13,14 @@ const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
   return acc;
 }, { index }));
 
-const validation = (arrayOfLinks, inputValue) => {
+const validation = (links, inputValue) => {
+
+  const schema = yup.string().url().notOneOf(links);
+  return schema.validate(inputValue);
+};
+
+export default () => {
+
   yup.setLocale({
     string: {
       url: 'validURL',
@@ -23,11 +30,6 @@ const validation = (arrayOfLinks, inputValue) => {
     },
   });
 
-  const schema = yup.string().url().notOneOf(arrayOfLinks);
-  return schema.validate(inputValue);
-};
-
-export default () => {
   const state = {
     form: {
       lng: 'ru',
@@ -44,8 +46,17 @@ export default () => {
     },
   };
 
-  const form = document.querySelector('.rss-form');
-  const watcher = onChange(state, render);
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    posts: document.querySelector('.posts'),
+    feeds: document.querySelector('.feeds'),
+    modal: document.getElementById('modal'),
+    submitB: document.body.querySelector('[aria-label = "add"]'),
+    textInput: document.body.querySelector('#url-input'),
+    feedbackP: document.body.querySelector('.feedback'),
+  };
+
+  const watcher = onChange(state, render(elements));
   const updateLink = (links, oldFeeds) => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)));
     const data = Promise.all(parsedData);
@@ -80,7 +91,7 @@ export default () => {
     resources,
   })
     .then(() => {
-      form.addEventListener('submit', (event) => {
+      elements.form.addEventListener('submit', (event) => {
         event.preventDefault();
         const formData = new FormData(event.target);
         const value = formData.get('url');
@@ -109,14 +120,13 @@ export default () => {
               e.name = 'parseError';
               throw (e);
             }
-            form.reset();
+            elements.form.reset();
             watcher.links.push(value);
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
             const { title, description, feedsInfo } = parsedResponse;
             watcher.descLink.push({ title, description });
             const indexed = addId(feedsInfo, watcher.links.length);
             watcher.currentFeeds.push(...indexed);
-            updateLink(state.links, state.currentFeeds);
             const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
             buttonsDesc.forEach((button) => {
               button.addEventListener('click', () => {
@@ -140,4 +150,5 @@ export default () => {
           });
       });
     });
+  updateLink(state.links, state.currentFeeds);
 };

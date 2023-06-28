@@ -1,6 +1,4 @@
-const textInput = document.body.querySelector('#url-input');
-const feedbackP = document.body.querySelector('.feedback');
-const submitB = document.body.querySelector('[aria-label = "add"]');
+import modal from "bootstrap/js/src/modal.js";
 
 const makeElements = (list, type) => {
   const divCont1 = document.createElement('div');
@@ -19,17 +17,17 @@ const makeElements = (list, type) => {
   return divCont1;
 };
 
-export default (path, value) => {
+export default (elements) => (path, value) => {
   if (path === 'form.valid') {
     switch (value) {
       case false:
-        feedbackP.classList.remove('text-success');
-        feedbackP.classList.add('text-danger');
-        textInput.classList.add('is-invalid');
+        elements.feedbackP.classList.remove('text-success');
+        elements.feedbackP.classList.add('text-danger');
+        elements.textInput.classList.add('is-invalid');
         break;
 
       case true:
-        textInput.classList.remove('is-invalid');
+        elements.textInput.classList.remove('is-invalid');
         break;
 
       default:
@@ -39,17 +37,17 @@ export default (path, value) => {
   if (path === 'form.error') {
     switch (value.type) {
       case 'ValidationError':
-        feedbackP.classList.add('text-danger');
-        feedbackP.textContent = value.message;
+        elements.feedbackP.classList.add('text-danger');
+        elements.feedbackP.textContent = value.message;
 
         break;
       case 'parseError':
-        feedbackP.classList.add('text-danger');
-        feedbackP.textContent = value.message;
+        elements.feedbackP.classList.add('text-danger');
+        elements.feedbackP.textContent = value.message;
         break;
       case 'AxiosError':
-        feedbackP.classList.add('text-danger');
-        feedbackP.textContent = value.message;
+        elements.feedbackP.classList.add('text-danger');
+        elements.feedbackP.textContent = value.message;
         break;
 
       default:
@@ -58,8 +56,10 @@ export default (path, value) => {
   }
   if (path === 'uiState.currentPost') {
     const modalContent = value[value.length - 1];
-    const titleModal = document.querySelector('.modal-title');
-    const descModal = document.querySelector('.modal-body');
+    const titleModal = elements.modal.querySelector('.modal-title');
+    const descModal = elements.modal.querySelector('.modal-body');
+    const modalLink = elements.modal.querySelector('a');
+    modalLink.href = modalContent.link;
     titleModal.textContent = modalContent.title;
     descModal.textContent = modalContent.description;
   }
@@ -70,7 +70,7 @@ export default (path, value) => {
     link.classList.add('fw-normal');
   }
   if (path === 'descLink') {
-    const rssDiv = document.body.querySelector('.feeds');
+    const rssDiv = elements.feeds;
     rssDiv.innerHTML = '';
     const rssElements = value.map((el) => {
       const li = document.createElement('li');
@@ -91,7 +91,7 @@ export default (path, value) => {
   }
 
   if (path === 'currentFeeds') {
-    const postDiv = document.body.querySelector('.posts');
+    const postDiv = elements.posts;
     postDiv.innerHTML = '';
     const liList = value.map((el) => {
       const li = document.createElement('li');
@@ -118,16 +118,16 @@ export default (path, value) => {
   if (path === 'form.state') {
     switch (value.name) {
       case 'success':
-        textInput.classList.remove('is-invalid');
-        feedbackP.classList.remove('text-danger');
-        feedbackP.classList.add('text-success');
-        feedbackP.textContent = value.message;
+        elements.textInput.classList.remove('is-invalid');
+        elements.feedbackP.classList.remove('text-danger');
+        elements.feedbackP.classList.add('text-success');
+        elements.feedbackP.textContent = value.message;
         break;
       case 'sending':
-        submitB.disabled = true;
+        elements.submitB.disabled = true;
         break;
       default:
-        submitB.disabled = false;
+        elements.submitB.disabled = false;
         break;
     }
   }

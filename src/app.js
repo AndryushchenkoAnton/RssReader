@@ -81,7 +81,6 @@ export default () => {
     exampleText.textContent = i18nextInstance.t('exampleURL');
     modalReadFull.textContent = i18nextInstance.t('moduleReadFull');
     modalClose.textContent = i18nextInstance.t('moduleClose');
-   
   };
 
   const watcher = onChange(state, render(elements, i18nextInstance));

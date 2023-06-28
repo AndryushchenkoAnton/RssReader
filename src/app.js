@@ -53,7 +53,7 @@ export default () => {
     lng: 'ru',
     debug: true,
     resources,
-  }).then()
+  }).then();
 
   const elements = {
     form: document.querySelector('.rss-form'),
@@ -64,7 +64,6 @@ export default () => {
     textInput: document.body.querySelector('#url-input'),
     feedbackP: document.body.querySelector('.feedback'),
   };
-
 
   const watcher = onChange(state, render(elements, i18nextInstance));
   const updateLink = (links, oldFeeds) => {
@@ -94,57 +93,55 @@ export default () => {
       .catch(() => []);
   };
 
+  elements.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const value = formData.get('url');
+    validation(watcher.links, value)
+      .then((result) => {
+        watcher.form.valid = true;
+        watcher.form.error = { type: null };
 
-
-      elements.form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const formData = new FormData(event.target);
-        const value = formData.get('url');
-        validation(watcher.links, value)
-          .then((result) => {
-            watcher.form.valid = true;
-            watcher.form.error = { type: null };
-
-            return result;
-          })
-          .then((link) => {
-            watcher.form.state = { name: 'sending' };
-            return axios.get(allOrigins(link));
-          })
-          .then((response) => {
-            watcher.form.state = { name: 'loaded' };
-            if (response.status !== 200) {
-              const e = new Error(`networkError: ${response.status}`);
-              throw (e);
-            }
-            const parsedResponse = parse(response.data.contents);
-            elements.form.reset();
-            watcher.links.push(value);
-            watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
-            const { title, description, feedsInfo } = parsedResponse;
-            watcher.descLink.push({ title, description });
-            const indexed = addId(feedsInfo, watcher.links.length);
-            watcher.currentFeeds.push(...indexed);
-            const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
-            buttonsDesc.forEach((button) => {
-              button.addEventListener('click', () => {
-                const link = button.parentNode.querySelector('a');
-                const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
-                watcher.uiState.currentPost = post;
-                watcher.uiState.readPosts.push({ post: post[post.length - 1], link });
-              });
-            });
-          })
-          .catch((e) => {
-            if (e.name === 'ValidationError') {
-              watcher.form.valid = false;
-              watcher.form.error = { type: e.name, message: e.message };
-              return;
-            }
-            watcher.form.valid = false;
-            watcher.form.error = { type: e.name, message: e.name };
+        return result;
+      })
+      .then((link) => {
+        watcher.form.state = { name: 'sending' };
+        return axios.get(allOrigins(link));
+      })
+      .then((response) => {
+        watcher.form.state = { name: 'loaded' };
+        if (response.status !== 200) {
+          const e = new Error(`networkError: ${response.status}`);
+          throw (e);
+        }
+        const parsedResponse = parse(response.data.contents);
+        elements.form.reset();
+        watcher.links.push(value);
+        watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };
+        const { title, description, feedsInfo } = parsedResponse;
+        watcher.descLink.push({ title, description });
+        const indexed = addId(feedsInfo, watcher.links.length);
+        watcher.currentFeeds.push(...indexed);
+        const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
+        buttonsDesc.forEach((button) => {
+          button.addEventListener('click', () => {
+            const link = button.parentNode.querySelector('a');
+            const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
+            watcher.uiState.currentPost = post;
+            watcher.uiState.readPosts.push({ post: post[post.length - 1], link });
           });
+        });
+      })
+      .catch((e) => {
+        if (e.name === 'ValidationError') {
+          watcher.form.valid = false;
+          watcher.form.error = { type: e.name, message: e.message };
+          return;
+        }
+        watcher.form.valid = false;
+        watcher.form.error = { type: e.name, message: e.name };
       });
+  });
 
   updateLink(state.links, state.currentFeeds);
 };

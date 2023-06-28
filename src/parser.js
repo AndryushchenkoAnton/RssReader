@@ -4,7 +4,9 @@ export default (data) => {
   const error = parsedData.querySelector('parsererror');
 
   if (error) {
-    return false;
+    const e = new Error('parseError');
+    e.name = 'parseError';
+    throw (e);
   }
 
   const document = parsedData.documentElement;

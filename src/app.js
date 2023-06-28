@@ -6,7 +6,11 @@ import render from './render.js';
 import resources from './locales/index.js';
 import parse from './parser.js';
 
-const allOrigins = (link) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
+const allOrigins = (link) => {
+  const url = new URL('https://allorigins.hexlet.app/get?disableCache=true&url=');
+  url.searchParams.set('url', link);
+  return url;
+};
 const addId = (list, index) => list.map((listEl) => listEl.reduce((acc, el) => {
   const name = el.nodeName;
   acc[name] = el.nodeText;
@@ -102,22 +106,15 @@ export default () => {
           })
           .then((link) => {
             watcher.form.state = { name: 'sending' };
-
             return axios.get(allOrigins(link));
           })
           .then((response) => {
-            console.log(response);
             watcher.form.state = { name: 'loaded' };
             if (response.status !== 200) {
               const e = new Error(`networkError: ${response.status}`);
               throw (e);
             }
             const parsedResponse = parse(response.data.contents);
-            if (!parsedResponse) {
-              const e = new Error('parseError');
-              e.name = 'parseError';
-              throw (e);
-            }
             elements.form.reset();
             watcher.links.push(value);
             watcher.form.state = { name: 'success', message: i18nextInstance.t('success') };

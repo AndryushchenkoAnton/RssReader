@@ -154,7 +154,7 @@ export default () => {
       .catch((e) => {
         if (e.name === 'ValidationError') {
           watcher.form.valid = false;
-          
+
           watcher.form.error = { errorType: e.message };
           return;
         }

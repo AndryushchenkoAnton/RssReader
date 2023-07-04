@@ -154,11 +154,12 @@ export default () => {
       .catch((e) => {
         if (e.name === 'ValidationError') {
           watcher.form.valid = false;
-          watcher.form.error = { errorType: e.name };
+          
+          watcher.form.error = { errorType: e.message };
           return;
         }
         watcher.form.valid = false;
-        watcher.form.error = { errorType: e.name};
+        watcher.form.error = { errorType: e.name };
       })
       .finally(() => updateLink(state.links, state.currentFeeds));
   });

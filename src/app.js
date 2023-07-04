@@ -38,7 +38,7 @@ export default () => {
       lng: 'ru',
       valid: true,
       state: 'ready',
-      error: { type: null },
+      error: { errorType: null },
     },
     descLink: [],
     links: [],
@@ -154,11 +154,11 @@ export default () => {
       .catch((e) => {
         if (e.name === 'ValidationError') {
           watcher.form.valid = false;
-          watcher.form.error = { errorType: e.name, errorMessage: e.message };
+          watcher.form.error = { errorType: e.name };
           return;
         }
         watcher.form.valid = false;
-        watcher.form.error = { errorType: e.name, errorMessage: e.name };
+        watcher.form.error = { errorType: e.name};
       })
       .finally(() => updateLink(state.links, state.currentFeeds));
   });

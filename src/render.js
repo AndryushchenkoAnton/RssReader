@@ -33,9 +33,9 @@ export default (elements, i18) => (path, value) => {
     }
   }
   if (path === 'form.error') {
-    const { errorMessage } = value;
+    const { errorType } = value;
     elements.feedbackP.classList.add('text-danger');
-    elements.feedbackP.textContent = i18.t(errorMessage);
+    elements.feedbackP.textContent = i18.t(errorType);
   }
   if (path === 'uiState.currentPost') {
     const { link, title, description } = value[value.length - 1];

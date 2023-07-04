@@ -33,25 +33,9 @@ export default (elements, i18) => (path, value) => {
     }
   }
   if (path === 'form.error') {
-    const { errorType, errorMessage } = value;
-    switch (errorType) {
-      case 'ValidationError':
-        elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(errorMessage);
-
-        break;
-      case 'parseError':
-        elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(errorMessage);
-        break;
-      case 'AxiosError':
-        elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(errorMessage);
-        break;
-
-      default:
-        break;
-    }
+    const { errorMessage } = value;
+    elements.feedbackP.classList.add('text-danger');
+    elements.feedbackP.textContent = i18.t(errorMessage);
   }
   if (path === 'uiState.currentPost') {
     const { link, title, description } = value[value.length - 1];

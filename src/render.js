@@ -33,19 +33,20 @@ export default (elements, i18) => (path, value) => {
     }
   }
   if (path === 'form.error') {
-    switch (value.type) {
+    const { errorType, errorMessage } = value;
+    switch (errorType) {
       case 'ValidationError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(value.message);
+        elements.feedbackP.textContent = i18.t(errorMessage);
 
         break;
       case 'parseError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(value.message);
+        elements.feedbackP.textContent = i18.t(errorMessage);
         break;
       case 'AxiosError':
         elements.feedbackP.classList.add('text-danger');
-        elements.feedbackP.textContent = i18.t(value.message);
+        elements.feedbackP.textContent = i18.t(errorMessage);
         break;
 
       default:
@@ -53,13 +54,13 @@ export default (elements, i18) => (path, value) => {
     }
   }
   if (path === 'uiState.currentPost') {
-    const modalContent = value[value.length - 1];
+    const { link, title, description } = value[value.length - 1];
     const titleModal = elements.modal.querySelector('.modal-title');
     const descModal = elements.modal.querySelector('.modal-body');
     const modalLink = elements.modal.querySelector('a');
-    modalLink.href = modalContent.link;
-    titleModal.textContent = modalContent.title;
-    descModal.textContent = modalContent.description;
+    modalLink.href = link;
+    titleModal.textContent = title;
+    descModal.textContent = description;
   }
   if (path === 'uiState.readPosts') {
     const lastElement = value[value.length - 1];
@@ -114,12 +115,13 @@ export default (elements, i18) => (path, value) => {
     postDiv.append(makeElements(liList, 'Посты'));
   }
   if (path === 'form.state') {
-    switch (value.name) {
+    const { currentState, message } = value;
+    switch (currentState) {
       case 'success':
         elements.textInput.classList.remove('is-invalid');
         elements.feedbackP.classList.remove('text-danger');
         elements.feedbackP.classList.add('text-success');
-        elements.feedbackP.textContent = i18.t(value.message);
+        elements.feedbackP.textContent = i18.t(message);
         break;
       case 'sending':
         elements.submitB.disabled = true;

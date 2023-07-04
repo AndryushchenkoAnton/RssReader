@@ -7,7 +7,8 @@ import resources from './locales/index.js';
 import parse from './parser.js';
 
 const allOrigins = (link) => {
-  const url = new URL('https://allorigins.hexlet.app/get?disableCache=true&url=');
+  const url = new URL('https://allorigins.hexlet.app/get');
+  url.searchParams.set('disableCache', 'true');
   url.searchParams.set('url', link);
   return url;
 };
@@ -100,17 +101,17 @@ export default () => {
       const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
       if (filteredFeeds.length !== 0) {
         watcher.currentFeeds.push(...filteredFeeds);
-        watcher.form.state = { name: 'updating' };
+        watcher.form.state = { currentState: 'updating' };
       }
     }).then(() => {
       setTimeout(() => {
-        watcher.form.state = { name: 'ready' };
-        return updateLink(state.links, state.currentFeeds);
+        watcher.form.state = { currentState: 'ready' };
+        updateLink(state.links, state.currentFeeds);
       }, 5000);
     })
       .catch(() => []);
   };
-  setText(elements);
+
   elements.form.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -118,16 +119,16 @@ export default () => {
     validation(watcher.links, value)
       .then((result) => {
         watcher.form.valid = true;
-        watcher.form.error = { type: null };
+        watcher.form.error = { errorType: null };
 
         return result;
       })
       .then((link) => {
-        watcher.form.state = { name: 'sending' };
+        watcher.form.state = { currentState: 'sending', message: 'sendingPosts' };
         return axios.get(allOrigins(link));
       })
       .then((response) => {
-        watcher.form.state = { name: 'loaded' };
+        watcher.form.state = { currentState: 'loaded' };
         if (response.status !== 200) {
           const e = new Error(`networkError: ${response.status}`);
           throw (e);
@@ -135,7 +136,7 @@ export default () => {
         const parsedResponse = parse(response.data.contents);
         elements.form.reset();
         watcher.links.push(value);
-        watcher.form.state = { name: 'success', message: 'success' };
+        watcher.form.state = { currentState: 'success', message: 'success' };
         const { title, description, feedsInfo } = parsedResponse;
         watcher.descLink.push({ title, description });
         const indexed = addId(feedsInfo, watcher.links.length);
@@ -153,13 +154,13 @@ export default () => {
       .catch((e) => {
         if (e.name === 'ValidationError') {
           watcher.form.valid = false;
-          watcher.form.error = { type: e.name, message: e.message };
+          watcher.form.error = { errorType: e.name, errorMessage: e.message };
           return;
         }
         watcher.form.valid = false;
-        watcher.form.error = { type: e.name, message: e.name };
-      });
+        watcher.form.error = { errorType: e.name, errorMessage: e.name };
+      })
+      .finally(() => updateLink(state.links, state.currentFeeds));
   });
-
-  updateLink(state.links, state.currentFeeds);
+  setText(elements);
 };

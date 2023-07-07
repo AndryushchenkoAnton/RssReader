@@ -48,14 +48,6 @@ export default () => {
       currentPost: null,
     },
   };
-
-  const i18nextInstance = i18next.createInstance();
-  i18nextInstance.init({
-    lng: 'ru',
-    debug: true,
-    resources,
-  }).then();
-
   const elements = {
     form: document.querySelector('.rss-form'),
     posts: document.querySelector('.posts'),
@@ -65,8 +57,7 @@ export default () => {
     textInput: document.body.querySelector('#url-input'),
     feedbackP: document.body.querySelector('.feedback'),
   };
-
-  const setText = (windowEl) => {
+  const setText = (i18L, windowEl) => {
     const appName = document.body.querySelector('#appName');
     const appDesc = document.body.querySelector('#appDesc');
     const textHint = document.body.querySelector('#textHint');
@@ -75,17 +66,18 @@ export default () => {
     const modalClose = windowEl.modal.querySelector('.btn-secondary');
     const modalReadFull = windowEl.modal.querySelector('a');
 
-    appName.textContent = i18nextInstance.t('appName');
-    appDesc.textContent = i18nextInstance.t('appDesc');
-    textHint.textContent = i18nextInstance.t('rssTip');
-    submitText.textContent = i18nextInstance.t('submitText');
-    exampleText.textContent = i18nextInstance.t('exampleURL');
-    modalReadFull.textContent = i18nextInstance.t('moduleReadFull');
-    modalClose.textContent = i18nextInstance.t('moduleClose');
+    appName.textContent = i18L.t('appName');
+    appDesc.textContent = i18L.t('appDesc');
+    textHint.textContent = i18L.t('rssTip');
+    submitText.textContent = i18L.t('submitText');
+    exampleText.textContent = i18L.t('exampleURL');
+    modalReadFull.textContent = i18L.t('moduleReadFull');
+    modalClose.textContent = i18L.t('moduleClose');
   };
 
+  const i18nextInstance = i18next.createInstance();
   const watcher = onChange(state, render(elements, i18nextInstance));
-  const updateLink = (links, oldFeeds) => {
+  const updateFeeds = (links, oldFeeds) => {
     const parsedData = links.map((link) => axios.get(allOrigins(link)));
     const data = Promise.all(parsedData);
     data.then((resolve) => {
@@ -103,65 +95,72 @@ export default () => {
         watcher.currentFeeds.push(...filteredFeeds);
         watcher.form.state = { currentState: 'updating' };
       }
-    }).then(() => {
-      setTimeout(() => {
-        watcher.form.state = { currentState: 'ready' };
-        updateLink(state.links, state.currentFeeds);
-      }, 5000);
     })
-      .catch(() => []);
+      .catch(() => [])
+      .finally(() => {
+        setTimeout(() => {
+          watcher.form.state = { currentState: 'ready' };
+          updateFeeds(state.links, state.currentFeeds);
+        }, 5000);
+      });
   };
 
-  elements.form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const value = formData.get('url');
-    validation(watcher.links, value)
-      .then((result) => {
-        watcher.form.valid = true;
-        watcher.form.error = { errorType: null };
+  i18nextInstance.init({
+    lng: 'ru',
+    debug: true,
+    resources,
+  }).then(() => {
+    elements.form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const value = formData.get('url');
+      validation(watcher.links, value)
+        .then((result) => {
+          watcher.form.valid = true;
+          watcher.form.error = { errorType: null };
 
-        return result;
-      })
-      .then((link) => {
-        watcher.form.state = { currentState: 'sending', message: 'sendingPosts' };
-        return axios.get(allOrigins(link));
-      })
-      .then((response) => {
-        watcher.form.state = { currentState: 'loaded' };
-        if (response.status !== 200) {
-          const e = new Error(`networkError: ${response.status}`);
-          throw (e);
-        }
-        const parsedResponse = parse(response.data.contents);
-        elements.form.reset();
-        watcher.links.push(value);
-        watcher.form.state = { currentState: 'success', message: 'success' };
-        const { title, description, feedsInfo } = parsedResponse;
-        watcher.descLink.push({ title, description });
-        const indexed = addId(feedsInfo, watcher.links.length);
-        watcher.currentFeeds.push(...indexed);
-        const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
-        buttonsDesc.forEach((button) => {
-          button.addEventListener('click', () => {
-            const link = button.parentNode.querySelector('a');
-            const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
-            watcher.uiState.currentPost = post;
-            watcher.uiState.readPosts.push({ post: post[post.length - 1], link });
+          return result;
+        })
+        .then((link) => {
+          watcher.form.state = { currentState: 'sending', message: 'sendingPosts' };
+          return axios.get(allOrigins(link));
+        })
+        .then((response) => {
+          watcher.form.state = { currentState: 'loaded' };
+          if (response.status !== 200) {
+            const e = new Error(`networkError: ${response.status}`);
+            throw (e);
+          }
+          const parsedResponse = parse(response.data.contents);
+          elements.form.reset();
+          watcher.links.push(value);
+          watcher.form.state = { currentState: 'success', message: 'success' };
+          const { title, description, feedsInfo } = parsedResponse;
+          watcher.descLink.push({ title, description });
+          const indexed = addId(feedsInfo, watcher.links.length);
+          watcher.currentFeeds.push(...indexed);
+          const buttonsDesc = document.querySelectorAll('.btn-outline-primary');
+          buttonsDesc.forEach((button) => {
+            button.addEventListener('click', () => {
+              const link = button.parentNode.querySelector('a');
+              const post = state.currentFeeds.filter((feed) => feed.title === link.textContent);
+              watcher.uiState.currentPost = post;
+              watcher.uiState.readPosts.push({ post: post[post.length - 1], link });
+            });
           });
-        });
-      })
-      .catch((e) => {
-        if (e.name === 'ValidationError') {
+        })
+        .catch((e) => {
+          if (e.name === 'ValidationError') {
+            watcher.form.valid = false;
+            watcher.form.error = { errorType: e.message };
+            return;
+          }
           watcher.form.valid = false;
-
-          watcher.form.error = { errorType: e.message };
-          return;
-        }
-        watcher.form.valid = false;
-        watcher.form.error = { errorType: e.name };
-      })
-      .finally(() => updateLink(state.links, state.currentFeeds));
+          watcher.form.error = { errorType: e.name };
+        });
+    });
   });
-  setText(elements);
+
+  setText(i18nextInstance, elements);
+  updateFeeds(state.links, state.currentFeeds);
 };

@@ -33,21 +33,6 @@ export default () => {
     },
   });
 
-  const state = {
-    form: {
-      lng: 'ru',
-      valid: true,
-      state: 'ready',
-      error: { errorType: null },
-    },
-    descLink: [],
-    links: [],
-    currentFeeds: [],
-    uiState: {
-      readPosts: [],
-      currentPost: null,
-    },
-  };
   const elements = {
     form: document.querySelector('.rss-form'),
     posts: document.querySelector('.posts'),
@@ -76,40 +61,57 @@ export default () => {
   };
 
   const i18nextInstance = i18next.createInstance();
-  const watcher = onChange(state, render(elements, i18nextInstance));
-  const updateFeeds = (links, oldFeeds) => {
-    const parsedData = links.map((link) => axios.get(allOrigins(link)));
-    const data = Promise.all(parsedData);
-    data.then((resolve) => {
-      const dataC = resolve.map((el) => {
-        const parsed = parse(el.data.contents);
-        if (!parsed) {
-          throw new Error();
-        }
-        return parsed;
-      }).filter((dataF) => dataF !== false);
-      const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
-      const titleOld = oldFeeds.map((el) => el.title);
-      const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
-      if (filteredFeeds.length !== 0) {
-        watcher.currentFeeds.push(...filteredFeeds);
-        watcher.form.state = { currentState: 'updating' };
-      }
-    })
-      .catch(() => [])
-      .finally(() => {
-        setTimeout(() => {
-          watcher.form.state = { currentState: 'ready' };
-          updateFeeds(state.links, state.currentFeeds);
-        }, 5000);
-      });
-  };
-
   i18nextInstance.init({
     lng: 'ru',
     debug: true,
     resources,
   }).then(() => {
+    const state = {
+      form: {
+        lng: 'ru',
+        valid: true,
+        state: 'ready',
+        error: { errorType: null },
+      },
+      descLink: [],
+      links: [],
+      currentFeeds: [],
+      uiState: {
+        readPosts: [],
+        currentPost: null,
+      },
+    };
+
+    const watcher = onChange(state, render(elements, i18nextInstance));
+
+    const updateFeeds = (links, oldFeeds) => {
+      const parsedData = links.map((link) => axios.get(allOrigins(link)));
+      const data = Promise.all(parsedData);
+      data.then((resolve) => {
+        const dataC = resolve.map((el) => {
+          const parsed = parse(el.data.contents);
+          if (!parsed) {
+            throw new Error();
+          }
+          return parsed;
+        }).filter((dataF) => dataF !== false);
+        const newFeeds = dataC.flatMap((feed, index) => addId(feed.feedsInfo, index + 1));
+        const titleOld = oldFeeds.map((el) => el.title);
+        const filteredFeeds = newFeeds.filter((feed) => !titleOld.includes(feed.title));
+        if (filteredFeeds.length !== 0) {
+          watcher.currentFeeds.push(...filteredFeeds);
+          watcher.form.state = { currentState: 'updating' };
+        }
+      })
+        .catch(() => [])
+        .finally(() => {
+          setTimeout(() => {
+            watcher.form.state = { currentState: 'ready' };
+            updateFeeds(state.links, state.currentFeeds);
+          }, 5000);
+        });
+    };
+
     elements.form.addEventListener('submit', (event) => {
       event.preventDefault();
       const formData = new FormData(event.target);
@@ -159,8 +161,8 @@ export default () => {
           watcher.form.error = { errorType: e.name };
         });
     });
-  });
 
-  setText(i18nextInstance, elements);
-  updateFeeds(state.links, state.currentFeeds);
+    setText(i18nextInstance, elements);
+    updateFeeds(state.links, state.currentFeeds);
+  });
 };
